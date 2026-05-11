@@ -1,230 +1,240 @@
-# Intrusion Detection System (IDS) with AI/ML
+# Network Intrusion Detection System with Explainable AI (XAI)
 
-An advanced network intrusion detection system leveraging deep learning and ensemble methods with explainable AI capabilities.
-
-## 📋 Overview
-
-This project implements a comprehensive intrusion detection system that combines multiple machine learning techniques to detect and classify network attacks. The system uses autoencoders for anomaly detection, Wasserstein GANs for data augmentation, and Random Forest classifiers for both binary and multi-class attack classification.
-
-## ✨ Key Features
-
-- **Binary Classification**: Distinguishes between normal traffic and attacks
-- **Multi-Class Classification**: Identifies specific attack types (DDoS, DoS, Bot, Brute Force, Web Attacks, Port Scan, etc.)
-- **Data Augmentation**: Uses WGAN to generate synthetic attack samples for balanced training
-- **Explainable AI**: Integrates SHAP and LIME for model interpretability
-- **Automated Feature Selection**: Uses SelectKBest to identify the most relevant features
-- **Comprehensive Evaluation**: Includes confusion matrices, ROC curves, and detailed performance metrics
-
-## 🎯 Supported Attack Types
-
-The system can detect and classify the following attack types:
-
-- **BENIGN**: Normal network traffic
-- **DDoS**: Distributed Denial of Service attacks
-- **DoS**: Denial of Service (GoldenEye, Hulk, Slowhttptest, slowloris)
-- **Bot**: Botnet activities
-- **Brute Force**: FTP-Patator, SSH-Patator
-- **Web Attacks**: SQL Injection, XSS, Brute Force
-- **Port Scan**: Network reconnaissance
-- **Infiltration**: Network infiltration attempts
-- **Heartbleed**: Heartbleed vulnerability exploitation
-
-## 🔧 Requirements
-
-### Python Packages
-
-```bash
-pip install numpy pandas matplotlib seaborn scikit-learn tensorflow shap lime
-```
-
-### Dependencies
-
-- **numpy**: Numerical computing
-- **pandas**: Data manipulation
-- **matplotlib & seaborn**: Visualization
-- **scikit-learn**: Machine learning algorithms
-- **tensorflow & keras**: Deep learning framework
-- **shap**: SHapley Additive exPlanations
-- **lime**: Local Interpretable Model-agnostic Explanations
-
-## 📊 Dataset
-
-The system is designed to work with the **CICIDS2017** dataset, which includes:
-
-- Monday-WorkingHours.pcap.csv
-- Tuesday-WorkingHours.pcap.csv
-- Wednesday-WorkingHours.pcap.csv
-- Thursday-WorkingHours-Morning-WebAttacks.pcap.csv
-- Thursday-WorkingHours-Afternoon-Infilteration.pcap.csv
-- Friday-WorkingHours-Morning.pcap.csv
-- Friday-WorkingHours-Afternoon-PortScan.pcap.csv
-- Friday-WorkingHours-Afternoon-DDos.pcap.csv
-
-**Note**: If dataset files are not available, the system automatically generates sample data for testing purposes.
-
-## 🏗️ Architecture
-
-### 1. **Autoencoder (AE)**
-- **Purpose**: Learn normal network behavior patterns
-- **Architecture**: 
-  - Encoder: Input → 24 → 20 → 16
-  - Decoder: 16 → 20 → 24 → Output
-- **Training**: Only on benign (normal) traffic
-- **Loss Function**: Mean Squared Error (MSE)
-
-### 2. **Wasserstein GAN (WGAN)**
-- **Purpose**: Generate synthetic attack samples for data balancing
-- **Generator**: 100 (latent) → 32 → 64 → 16 (encoding)
-- **Critic**: 16 → 24 → 16 → 1
-- **Gradient Penalty**: λ = 10.0
-- **Optimization**: Adam optimizer with β₁=0.0, β₂=0.9
-
-### 3. **Random Forest Classifiers**
-- **Binary Classifier**: 
-  - Normal vs Attack detection
-  - 100 estimators, max_depth=10
-- **Multi-Class Classifier**: 
-  - Specific attack type identification
-  - 100 estimators, max_depth=8
-  - Class-balanced weights
-
-## 📈 Performance Metrics
-
-The system evaluates models using:
-
-- **Accuracy**: Overall classification correctness
-- **Precision**: True positive rate among predicted positives
-- **Recall**: True positive rate among actual positives
-- **F1-Score**: Harmonic mean of precision and recall
-- **ROC-AUC**: Area under the receiver operating characteristic curve
-- **Confusion Matrix**: Detailed classification breakdown
-
-## 🔍 Explainable AI (XAI)
-
-### SHAP (SHapley Additive exPlanations)
-
-- **Summary Plots**: Global feature importance visualization
-- **Bar Plots**: Ranked feature importance
-- **Dependence Plots**: Feature value vs. SHAP value relationships
-- **Waterfall Plots**: Individual prediction explanations
-- **Decision Plots**: Multi-class decision boundaries
-
-### LIME (Local Interpretable Model-agnostic Explanations)
-
-- **Local Explanations**: Individual prediction interpretability
-- **Feature Contribution**: Identifies which features drove specific predictions
-- **Attack-Specific Analysis**: Shows discriminative features for each attack type
-
-## 🚀 Usage
-
-### Running the Complete Pipeline
-
-1. **Load and prepare data**:
-   - Place CICIDS2017 CSV files in the working directory
-   - Or let the system generate sample data
-
-2. **Execute the notebook**:
-   - Run all cells sequentially
-   - The system will automatically handle data preprocessing, model training, and evaluation
-
-3. **Analyze results**:
-   - Review performance metrics
-   - Examine SHAP and LIME explanations
-   - Check feature-attack relationships
-
-### Testing New Samples
-
-Use the provided function to analyze new network traffic:
-
-```python
-# Analyze a single sample
-sample = X_test.iloc[0]
-result = corrected_predict_attack_type(sample, show_details=True)
-
-# Results include:
-# - Binary classification (Attack/Normal)
-# - Confidence scores
-# - Predicted attack type
-# - Top 3 attack type predictions
-```
-
-## 📁 Project Structure
-
-```
-Intrusion Detection System.ipynb
-├── Section 1-5: Data Loading & Preprocessing
-│   ├── Data loading and cleaning
-│   ├── Attack type mapping
-│   ├── Feature engineering
-│   ├── Feature selection (top 50)
-│   └── Train/test split (stratified)
-├── Section 6-7: Deep Learning Models
-│   ├── Autoencoder training
-│   └── WGAN training & synthetic data generation
-├── Section 8-9: Classification Models
-│   ├── Binary classifier (Normal vs Attack)
-│   └── Multi-class classifier (Attack types)
-├── Section 10-13: Explainable AI
-│   ├── SHAP analysis (binary & multi-class)
-│   └── LIME analysis (binary & multi-class)
-└── Section 14: Validation & Analysis
-    ├── Model verification
-    ├── Feature-attack relationships
-    └── Prediction functions
-```
-
-## 🎓 Key Insights
-
-### Data Balancing
-- Original dataset often has class imbalance (benign >> attacks)
-- WGAN generates synthetic attack samples to achieve ~70% benign, 30% attack ratio
-- Prevents model bias toward majority class
-
-### Feature Selection
-- Reduces dimensionality from 78+ features to top 50
-- Uses ANOVA F-statistic (f_classif)
-- Improves model performance and reduces overfitting
-
-### Regularization
-- Random Forest max_depth and min_samples parameters prevent overfitting
-- Achieves balance between accuracy and generalization
-
-## ⚠️ Important Notes
-
-### Overfitting Detection
-The system includes warnings for:
-- Accuracy ≥ 99% (suspiciously high)
-- Single feature with importance > 0.5 (possible data leakage)
-
-### Data Leakage Prevention
-- Target variables (`Label`, `Attack_Type`) explicitly excluded from features
-- Attack type mapping preserved before binary conversion
-- Proper train/test splitting with stratification
-
-## 🔮 Future Improvements
-
-1. **Real-time Detection**: Implement streaming data processing
-2. **Additional Models**: Test with CNN, LSTM, or Transformer architectures
-3. **Feature Engineering**: Extract time-series and sequential patterns
-4. **Ensemble Methods**: Combine multiple models for improved accuracy
-5. **Deployment**: Create API endpoint for production use
-6. **Dashboard**: Build real-time monitoring dashboard
-
-## 📚 References
-
-- **CICIDS2017 Dataset**: Canadian Institute for Cybersecurity
-- **SHAP**: Lundberg & Lee (2017)
-- **LIME**: Ribeiro et al. (2016)
-- **WGAN**: Arjovsky et al. (2017)
-
-## 👥 Contributing
-
-This is an academic project for intrusion detection research. Suggestions and improvements are welcome.
-
-## 📄 License
-
-This project is developed for educational and research purposes.
+A machine learning pipeline for detecting and classifying network intrusions using the **CICIDS2017** dataset. The project covers binary and multi-class classification, deep learning-based data augmentation with an Autoencoder + WGAN, and model explainability via SHAP and LIME.
 
 ---
 
-**Author**: Sureshkumar  TK, Mahizhnan C, Vasanth Krishna V
+## Table of Contents
+
+- [Overview](#overview)
+- [Dataset](#dataset)
+- [Project Pipeline](#project-pipeline)
+- [Models](#models)
+- [Explainability (XAI)](#explainability-xai)
+- [Requirements](#requirements)
+- [Usage](#usage)
+- [Results](#results)
+- [Project Structure](#project-structure)
+
+---
+
+## Overview
+
+This project builds a Network Intrusion Detection System (NIDS) that:
+
+- Classifies network traffic as **benign or malicious** (binary) and identifies the **specific attack type** (multi-class, 7 classes).
+- Addresses class imbalance using a **deep learning Autoencoder + Wasserstein GAN (WGAN)** for synthetic minority sample generation.
+- Provides **model interpretability** using SHAP (global) and LIME (per-class local explanations).
+
+---
+
+## Dataset
+
+**CICIDS2017** — Canadian Institute for Cybersecurity Intrusion Detection Evaluation Dataset 2017.
+
+| File | Description |
+|------|-------------|
+| `Monday-WorkingHours.pcap.csv` | Benign traffic only |
+| `Tuesday-WorkingHours.pcap.csv` | FTP-Patator, SSH-Patator |
+| `Wednesday-WorkingHours.pcap.csv` | DoS Hulk, DoS GoldenEye, DoS slowloris, DoS Slowhttptest, Heartbleed |
+| `Thursday-WorkingHours-Morning-WebAttacks.pcap.csv` | Web Attacks (Brute Force, XSS, SQL Injection) |
+| `Thursday-WorkingHours-Afternoon-Infilteration.pcap.csv` | Infiltration |
+| `Friday-WorkingHours-Morning.pcap.csv` | Botnet ARES |
+| `Friday-WorkingHours-Afternoon-PortScan.pcap.csv` | PortScan |
+| `Friday-WorkingHours-Afternoon-DDos.pcap.csv` | DDoS |
+
+**Total records loaded:** ~2.83 million rows across 8 CSV files, each with **79 features**.
+
+**7 consolidated attack classes used:**
+
+| Class | Training Samples |
+|-------|-----------------|
+| BENIGN | 439,962 |
+| DoS | 40,782 |
+| DDoS | 26,682 |
+| PortScan | 19,138 |
+| Infiltration | 1,940 |
+| Web Attack | 466 |
+| Bot | 397 |
+
+> If dataset files are not found locally, the notebook falls back to auto-generated synthetic data for testing.
+
+---
+
+## Project Pipeline
+
+```
+Raw CSVs (8 files)
+       │
+       ▼
+ 1. Data Loading & Merging
+       │
+       ▼
+ 2. Cleaning (drop NaN, Inf, duplicates, strip column names)
+       │
+       ▼
+ 3. Label Consolidation → 7 attack classes
+       │
+       ▼
+ 4. EDA (class distribution, feature correlation)
+       │
+       ▼
+ 5. Preprocessing
+    ├── OrdinalEncoder (categorical features)
+    ├── MinMaxScaler (numerical features)
+    └── SelectKBest / f_classif (feature selection)
+       │
+       ▼
+ 6. Train/Test Split (stratified, 75/25)
+       │
+       ▼
+ 7. Baseline ML Models (Binary + Multi-class)
+    ├── Random Forest
+    ├── Gradient Boosting
+    ├── Decision Tree
+    └── KNN
+       │
+       ▼
+ 8. Deep Learning Augmentation
+    ├── Autoencoder (50 epochs, batch=256, EarlyStopping)
+    └── WGAN (100 epochs, latent space augmentation)
+       │
+       ▼
+ 9. Augmented ML Models (Binary + Multi-class)
+       │
+       ▼
+10. Evaluation
+    ├── Accuracy, Precision, Recall, F1-Score
+    ├── Confusion Matrix
+    └── ROC-AUC Curve
+       │
+       ▼
+11. Explainability
+    ├── SHAP (global feature importance)
+    └── LIME (per-class local explanations)
+```
+
+---
+
+## Models
+
+### Classical ML Classifiers
+
+| Model | Task |
+|-------|------|
+| Random Forest | Binary + Multi-class |
+| Gradient Boosting | Binary + Multi-class |
+| Decision Tree | Binary + Multi-class |
+| K-Nearest Neighbors (KNN) | Binary + Multi-class |
+
+### Deep Learning
+
+| Component | Architecture | Purpose |
+|-----------|-------------|---------|
+| **Autoencoder** | Dense encoder-decoder, Adam optimizer, MSE loss, 50 epochs | Feature compression + reconstruction for WGAN input |
+| **WGAN (Wasserstein GAN)** | Generator + Critic (Dense layers), 100 epochs | Synthetic minority class sample generation to address imbalance |
+
+The AE+WGAN pipeline encodes attack-class samples into a latent representation, trains the WGAN in that space, and decodes generated samples back to feature space for augmentation.
+
+---
+
+## Explainability (XAI)
+
+### SHAP (Global)
+- Computes **mean absolute SHAP values** across the test set using the Random Forest model.
+- Produces a ranked bar chart of the top features contributing to predictions globally.
+
+### LIME (Per-Class Local)
+- Generates **top-10 feature importance** explanations per attack class.
+- Uses `LimeTabularExplainer` with the Random Forest as the black-box model.
+- Visualised as horizontal bar charts (9-panel grid) with Mean LIME weights per class.
+
+**Attack classes explained:** BENIGN, Bot, DDoS, DoS, Infiltration, PortScan, Web Attack.
+
+Key features identified across classes include `Fwd Packet Length Std`, `Flow_IAT_Regularity`, `Destination Port`, `Subflow Fwd Bytes`, `Init_Win_bytes_backward`, and `Bwd IAT Std`.
+
+---
+
+## Requirements
+
+```
+Python >= 3.10
+tensorflow >= 2.20
+scikit-learn
+numpy
+pandas
+matplotlib
+seaborn
+shap
+lime
+```
+
+Install all dependencies:
+
+```bash
+pip install numpy pandas matplotlib seaborn shap lime tensorflow scikit-learn
+```
+
+---
+
+## Usage
+
+1. **Clone the repository** and place the CICIDS2017 CSV files in the same directory as the notebook.
+
+2. **Launch Jupyter:**
+   ```bash
+   jupyter notebook Intrusion_Detection_System.ipynb
+   ```
+
+3. **Run all cells** in order. The notebook is self-contained — if CSV files are missing, it generates sample data automatically and continues.
+
+4. **Expected outputs per section:**
+   - Class distribution plots
+   - Correlation heatmaps
+   - Autoencoder training loss curve
+   - WGAN training loss curve (Generator + Critic)
+   - Model comparison bar charts (before/after augmentation)
+   - Confusion matrices and ROC-AUC curves
+   - SHAP summary plot
+   - LIME per-class feature importance charts
+
+---
+
+## Results
+
+### Binary Classification (Before vs After AE/WGAN Augmentation)
+
+The notebook prints a side-by-side comparison table for all 4 models showing changes in Accuracy, Precision, Recall, and F1-Score after augmentation.
+
+### Multi-Class Classification
+
+A full **7-class × 4-model** metric table (Precision, Recall, F1-Score, Support) is generated for both pre- and post-augmentation runs.
+
+> Note: Exact metric values depend on the dataset split seed and augmentation run. The notebook prints all results inline.
+
+---
+
+## Project Structure
+
+```
+.
+├── Intrusion_Detection_System.ipynb   # Main notebook
+├── Monday-WorkingHours.pcap.csv
+├── Tuesday-WorkingHours.pcap.csv
+├── Wednesday-WorkingHours.pcap.csv
+├── Thursday-WorkingHours-Morning-WebAttacks.pcap.csv
+├── Thursday-WorkingHours-Afternoon-Infilteration.pcap.csv
+├── Friday-WorkingHours-Morning.pcap.csv
+├── Friday-WorkingHours-Afternoon-PortScan.pcap.csv
+├── Friday-WorkingHours-Afternoon-DDos.pcap.csv
+└── README.md
+```
+
+---
+
+## References
+
+- Sharafaldin, I., Lashkari, A. H., & Ghorbani, A. A. (2018). *Toward Generating a New Intrusion Detection Dataset and Intrusion Traffic Characterization.* ICISSP 2018. — [CICIDS2017 Dataset](https://www.unb.ca/cic/datasets/ids-2017.html)
+- Lundberg, S. M., & Lee, S.-I. (2017). *A Unified Approach to Interpreting Model Predictions.* NeurIPS 2017. — SHAP
+- Ribeiro, M. T., Singh, S., & Guestrin, C. (2016). *"Why Should I Trust You?": Explaining the Predictions of Any Classifier.* KDD 2016. — LIME
+- Arjovsky, M., Chintala, S., & Bottou, L. (2017). *Wasserstein GAN.* arXiv:1701.07875.
